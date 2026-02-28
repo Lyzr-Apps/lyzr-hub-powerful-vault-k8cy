@@ -105,7 +105,7 @@ export default function DashboardSection({ accounts, monitorData, loading, error
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-semibold tracking-tight text-[hsl(220,20%,15%)]">Credit Overview</h2>
+          <h2 className="text-base font-semibold tracking-tight text-[hsl(220,20%,15%)]">Architect Credit Overview</h2>
           {monitorData?.overall_status && (
             <p className="text-xs text-[hsl(220,12%,50%)] mt-0.5">{monitorData.overall_status}</p>
           )}

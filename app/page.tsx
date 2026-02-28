@@ -261,7 +261,10 @@ export default function Page() {
           />
           <div className="flex-1 flex flex-col overflow-hidden">
             <header className="h-10 border-b border-[hsl(220,15%,88%)] bg-white flex items-center justify-between px-4 flex-shrink-0">
-              <h1 className="text-sm font-semibold tracking-tight text-[hsl(220,20%,15%)]">Multi-Account Credit Hub</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm font-semibold tracking-tight text-[hsl(220,20%,15%)]">Architect Credit Hub</h1>
+                <span className="text-[10px] text-[hsl(220,12%,50%)] font-medium border border-[hsl(220,15%,88%)] rounded-sm px-1.5 py-0.5">by Lyzr</span>
+              </div>
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1.5">
                   <Label htmlFor="sample-toggle" className="text-[10px] text-[hsl(220,12%,50%)] font-medium">Sample Data</Label>
@@ -311,7 +314,7 @@ export default function Page() {
               <Card className="mt-4 rounded-sm border border-[hsl(220,15%,88%)] shadow-none bg-white">
                 <CardContent className="py-2 px-3">
                   <div className="flex items-center gap-4 flex-wrap">
-                    <span className="text-[10px] font-medium text-[hsl(220,12%,50%)] uppercase tracking-wider">Agents</span>
+                    <span className="text-[10px] font-medium text-[hsl(220,12%,50%)] uppercase tracking-wider">Architect Agents</span>
                     <Separator orientation="vertical" className="h-4 bg-[hsl(220,15%,88%)]" />
                     {AGENTS.map(agent => (
                       <div key={agent.id} className="flex items-center gap-1.5">

@@ -45,7 +45,10 @@ export default function Sidebar({ activeSection, onNavigate, alertCount, collaps
             <div className="h-7 w-7 rounded-sm bg-[hsl(220,75%,50%)] flex items-center justify-center flex-shrink-0">
               <HiOutlineCreditCard className="h-4 w-4 text-white" />
             </div>
-            <span className="font-sans font-semibold text-sm tracking-tight text-[hsl(220,20%,15%)] truncate">Credit Hub</span>
+            <div className="min-w-0">
+              <span className="font-sans font-semibold text-sm tracking-tight text-[hsl(220,20%,15%)] truncate block leading-tight">Architect</span>
+              <span className="text-[9px] text-[hsl(220,12%,50%)] tracking-tight leading-none">by Lyzr</span>
+            </div>
           </div>
         )}
         <Button
@@ -82,8 +85,8 @@ export default function Sidebar({ activeSection, onNavigate, alertCount, collaps
       </nav>
       {!collapsed && (
         <div className="px-3 py-2 border-t border-[hsl(220,15%,88%)]">
-          <p className="text-[10px] text-[hsl(220,12%,50%)] tracking-tight leading-tight">Multi-Account Credit Hub</p>
-          <p className="text-[10px] text-[hsl(220,10%,70%)] tracking-tight">v1.0.0</p>
+          <p className="text-[10px] text-[hsl(220,12%,50%)] tracking-tight leading-tight">Architect Credit Hub</p>
+          <p className="text-[10px] text-[hsl(220,10%,70%)] tracking-tight">Powered by Lyzr</p>
         </div>
       )}
     </aside>
