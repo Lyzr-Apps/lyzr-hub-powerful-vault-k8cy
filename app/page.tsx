@@ -15,11 +15,11 @@ import {
 } from 'react-icons/hi2'
 import { Loader2 } from 'lucide-react'
 
-import Sidebar, { type NavSection } from './sections/Sidebar'
-import DashboardSection from './sections/DashboardSection'
-import AnalyticsSection from './sections/AnalyticsSection'
-import AccountManagementSection from './sections/AccountManagementSection'
-import SettingsSection from './sections/SettingsSection'
+import Sidebar, { type NavSection } from '@/components/sections/Sidebar'
+import DashboardSection from '@/components/sections/DashboardSection'
+import AnalyticsSection from '@/components/sections/AnalyticsSection'
+import AccountManagementSection from '@/components/sections/AccountManagementSection'
+import SettingsSection from '@/components/sections/SettingsSection'
 
 const CREDIT_MONITOR_AGENT = '69a2915e27b2efe3a887db3a'
 const USAGE_ANALYTICS_AGENT = '69a2915f7feec6663e53dac3'
@@ -116,43 +116,16 @@ const SAMPLE_ADVISOR = {
 }
 
 const AGENTS = [
-  { id: CREDIT_MONITOR_AGENT, name: 'Credit Monitor', purpose: 'Analyzes credit balances and generates alerts', icon: <HiOutlineCreditCard className="h-3 w-3" /> },
-  { id: USAGE_ANALYTICS_AGENT, name: 'Usage Analytics', purpose: 'Analyzes consumption trends and optimization', icon: <HiOutlineChartBarSquare className="h-3 w-3" /> },
-  { id: ACCOUNT_ADVISOR_AGENT, name: 'Account Advisor', purpose: 'Recommends rebalancing and consolidation', icon: <HiOutlineUserGroup className="h-3 w-3" /> },
+  { id: CREDIT_MONITOR_AGENT, name: 'Credit Monitor', icon: <HiOutlineCreditCard className="h-3 w-3" /> },
+  { id: USAGE_ANALYTICS_AGENT, name: 'Usage Analytics', icon: <HiOutlineChartBarSquare className="h-3 w-3" /> },
+  { id: ACCOUNT_ADVISOR_AGENT, name: 'Account Advisor', icon: <HiOutlineUserGroup className="h-3 w-3" /> },
 ]
-
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean; error: string }
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props)
-    this.state = { hasError: false, error: '' }
-  }
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error: error.message }
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-background text-foreground">
-          <div className="text-center p-8 max-w-md">
-            <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
-            <p className="text-muted-foreground mb-4 text-sm">{this.state.error}</p>
-            <button onClick={() => this.setState({ hasError: false, error: '' })} className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm">Try again</button>
-          </div>
-        </div>
-      )
-    }
-    return this.props.children
-  }
-}
 
 export default function Page() {
   const [activeSection, setActiveSection] = useState<NavSection>('dashboard')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [showSampleData, setShowSampleData] = useState(false)
-  const [accounts] = useState(DEFAULT_ACCOUNTS)
+  const [accounts, setAccounts] = useState(DEFAULT_ACCOUNTS)
 
   const [monitorData, setMonitorData] = useState<Record<string, any> | null>(null)
   const [monitorLoading, setMonitorLoading] = useState(false)
@@ -168,7 +141,41 @@ export default function Page() {
 
   const [activeAgentId, setActiveAgentId] = useState<string | null>(null)
 
+  const [transferLog, setTransferLog] = useState<{ from: string; to: string; amount: number; timestamp: string }[]>([])
+
   const accountContext = accounts.map(a => `- ${a.name} (${a.id}): Allocated ${a.credits.allocated}, Used ${a.credits.used}, Remaining ${a.credits.remaining}`).join('\n')
+
+  const handleTransferCredits = useCallback((fromId: string, toId: string, amount: number) => {
+    setAccounts(prev => prev.map(acc => {
+      if (acc.id === fromId) {
+        return {
+          ...acc,
+          credits: {
+            ...acc.credits,
+            allocated: acc.credits.allocated - amount,
+            remaining: acc.credits.remaining - amount,
+          },
+          lastSync: new Date().toISOString(),
+        }
+      }
+      if (acc.id === toId) {
+        return {
+          ...acc,
+          credits: {
+            ...acc.credits,
+            allocated: acc.credits.allocated + amount,
+            remaining: acc.credits.remaining + amount,
+          },
+          lastSync: new Date().toISOString(),
+        }
+      }
+      return acc
+    }))
+    const fromName = accounts.find(a => a.id === fromId)?.name ?? fromId
+    const toName = accounts.find(a => a.id === toId)?.name ?? toId
+    setTransferLog(prev => [...prev, { from: fromName, to: toName, amount, timestamp: new Date().toISOString() }])
+    setMonitorData(null)
+  }, [accounts])
 
   const handleRefreshCredits = useCallback(async () => {
     if (showSampleData) { setMonitorData(SAMPLE_MONITOR); return }
@@ -249,88 +256,92 @@ export default function Page() {
   const alertCount = showSampleData ? (SAMPLE_MONITOR.alerts?.length ?? 0) : (Array.isArray(monitorData?.alerts) ? monitorData.alerts.length : 0)
 
   return (
-    <ErrorBoundary>
-      <div style={THEME_VARS} className="min-h-screen bg-[hsl(220,15%,97%)] text-[hsl(220,20%,15%)] font-sans">
-        <div className="flex h-screen overflow-hidden">
-          <Sidebar
-            activeSection={activeSection}
-            onNavigate={setActiveSection}
-            alertCount={alertCount}
-            collapsed={sidebarCollapsed}
-            onToggleCollapse={() => setSidebarCollapsed(p => !p)}
-          />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <header className="h-10 border-b border-[hsl(220,15%,88%)] bg-white flex items-center justify-between px-4 flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm font-semibold tracking-tight text-[hsl(220,20%,15%)]">Architect Credit Hub</h1>
-                <span className="text-[10px] text-[hsl(220,12%,50%)] font-medium border border-[hsl(220,15%,88%)] rounded-sm px-1.5 py-0.5">by Lyzr</span>
+    <div style={THEME_VARS} className="min-h-screen bg-[hsl(220,15%,97%)] text-[hsl(220,20%,15%)] font-sans">
+      <div className="flex h-screen overflow-hidden">
+        <Sidebar
+          activeSection={activeSection}
+          onNavigate={setActiveSection}
+          alertCount={alertCount}
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(p => !p)}
+        />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <header className="h-10 border-b border-[hsl(220,15%,88%)] bg-white flex items-center justify-between px-4 flex-shrink-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-sm font-semibold tracking-tight text-[hsl(220,20%,15%)]">Architect Credit Hub</h1>
+              <span className="text-[10px] text-[hsl(220,12%,50%)] font-medium border border-[hsl(220,15%,88%)] rounded-sm px-1.5 py-0.5">by Lyzr</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {transferLog.length > 0 && (
+                <span className="text-[10px] text-[hsl(160,65%,40%)] font-medium">
+                  {transferLog.length} transfer{transferLog.length > 1 ? 's' : ''} completed
+                </span>
+              )}
+              <div className="flex items-center gap-1.5">
+                <Label htmlFor="sample-toggle" className="text-[10px] text-[hsl(220,12%,50%)] font-medium">Sample Data</Label>
+                <Switch id="sample-toggle" checked={showSampleData} onCheckedChange={handleSampleToggle} className="scale-75" />
               </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1.5">
-                  <Label htmlFor="sample-toggle" className="text-[10px] text-[hsl(220,12%,50%)] font-medium">Sample Data</Label>
-                  <Switch id="sample-toggle" checked={showSampleData} onCheckedChange={handleSampleToggle} className="scale-75" />
-                </div>
-                <div className="relative">
-                  <HiOutlineBellAlert className="h-4 w-4 text-[hsl(220,12%,50%)]" />
-                  {alertCount > 0 && (
-                    <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-[hsl(0,70%,50%)] text-white text-[8px] flex items-center justify-center font-semibold">{alertCount}</span>
-                  )}
-                </div>
+              <div className="relative">
+                <HiOutlineBellAlert className="h-4 w-4 text-[hsl(220,12%,50%)]" />
+                {alertCount > 0 && (
+                  <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-[hsl(0,70%,50%)] text-white text-[8px] flex items-center justify-center font-semibold">{alertCount}</span>
+                )}
               </div>
-            </header>
+            </div>
+          </header>
 
-            <main className="flex-1 overflow-y-auto p-3">
-              {activeSection === 'dashboard' && (
-                <DashboardSection
-                  accounts={accounts}
-                  monitorData={monitorData}
-                  loading={monitorLoading}
-                  error={monitorError}
-                  onRefresh={handleRefreshCredits}
-                />
-              )}
-              {activeSection === 'analytics' && (
-                <AnalyticsSection
-                  accounts={accounts}
-                  analyticsData={analyticsData}
-                  loading={analyticsLoading}
-                  error={analyticsError}
-                  onGenerate={handleGenerateInsights}
-                />
-              )}
-              {activeSection === 'accounts' && (
-                <AccountManagementSection
-                  accounts={accounts}
-                  advisorData={advisorData}
-                  loading={advisorLoading}
-                  error={advisorError}
-                  onGetRecommendations={handleGetRecommendations}
-                />
-              )}
-              {activeSection === 'settings' && (
-                <SettingsSection accounts={accounts} />
-              )}
+          <main className="flex-1 overflow-y-auto p-3">
+            {activeSection === 'dashboard' && (
+              <DashboardSection
+                accounts={accounts}
+                monitorData={monitorData}
+                loading={monitorLoading}
+                error={monitorError}
+                onRefresh={handleRefreshCredits}
+                onTransferCredits={handleTransferCredits}
+              />
+            )}
+            {activeSection === 'analytics' && (
+              <AnalyticsSection
+                accounts={accounts}
+                analyticsData={analyticsData}
+                loading={analyticsLoading}
+                error={analyticsError}
+                onGenerate={handleGenerateInsights}
+              />
+            )}
+            {activeSection === 'accounts' && (
+              <AccountManagementSection
+                accounts={accounts}
+                advisorData={advisorData}
+                loading={advisorLoading}
+                error={advisorError}
+                onGetRecommendations={handleGetRecommendations}
+              />
+            )}
+            {activeSection === 'settings' && (
+              <SettingsSection accounts={accounts} />
+            )}
 
-              <Card className="mt-4 rounded-sm border border-[hsl(220,15%,88%)] shadow-none bg-white">
-                <CardContent className="py-2 px-3">
-                  <div className="flex items-center gap-4 flex-wrap">
-                    <span className="text-[10px] font-medium text-[hsl(220,12%,50%)] uppercase tracking-wider">Architect Agents</span>
-                    <Separator orientation="vertical" className="h-4 bg-[hsl(220,15%,88%)]" />
-                    {AGENTS.map(agent => (
-                      <div key={agent.id} className="flex items-center gap-1.5">
-                        <span className={`h-1.5 w-1.5 rounded-full ${activeAgentId === agent.id ? 'bg-[hsl(160,65%,40%)] animate-pulse' : 'bg-[hsl(220,10%,80%)]'}`} />
-                        {agent.icon}
-                        <span className="text-[10px] text-[hsl(220,20%,15%)] font-medium">{agent.name}</span>
-                        {activeAgentId === agent.id && <Loader2 className="h-2.5 w-2.5 animate-spin text-[hsl(220,75%,50%)]" />}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </main>
-          </div>
+            <Card className="mt-4 rounded-sm border border-[hsl(220,15%,88%)] shadow-none bg-white">
+              <CardContent className="py-2 px-3">
+                <div className="flex items-center gap-4 flex-wrap">
+                  <span className="text-[10px] font-medium text-[hsl(220,12%,50%)] uppercase tracking-wider">Architect Agents</span>
+                  <Separator orientation="vertical" className="h-4 bg-[hsl(220,15%,88%)]" />
+                  {AGENTS.map(agent => (
+                    <div key={agent.id} className="flex items-center gap-1.5">
+                      <span className={`h-1.5 w-1.5 rounded-full ${activeAgentId === agent.id ? 'bg-[hsl(160,65%,40%)] animate-pulse' : 'bg-[hsl(220,10%,80%)]'}`} />
+                      {agent.icon}
+                      <span className="text-[10px] text-[hsl(220,20%,15%)] font-medium">{agent.name}</span>
+                      {activeAgentId === agent.id && <Loader2 className="h-2.5 w-2.5 animate-spin text-[hsl(220,75%,50%)]" />}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </main>
         </div>
       </div>
-    </ErrorBoundary>
+    </div>
   )
 }

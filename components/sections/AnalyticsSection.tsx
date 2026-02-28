@@ -56,22 +56,6 @@ function priorityColor(p?: string): string {
   return 'bg-[hsl(220,75%,50%)] text-white'
 }
 
-function renderMarkdown(text: string) {
-  if (!text) return null
-  return (
-    <div className="space-y-1">
-      {text.split('\n').map((line, i) => {
-        if (line.startsWith('### ')) return <h4 key={i} className="font-semibold text-xs mt-2 mb-0.5">{line.slice(4)}</h4>
-        if (line.startsWith('## ')) return <h3 key={i} className="font-semibold text-sm mt-2 mb-0.5">{line.slice(3)}</h3>
-        if (line.startsWith('# ')) return <h2 key={i} className="font-semibold text-base mt-2 mb-1">{line.slice(2)}</h2>
-        if (line.startsWith('- ') || line.startsWith('* ')) return <li key={i} className="ml-3 list-disc text-xs">{line.slice(2)}</li>
-        if (!line.trim()) return <div key={i} className="h-0.5" />
-        return <p key={i} className="text-xs">{line}</p>
-      })}
-    </div>
-  )
-}
-
 export default function AnalyticsSection({ accounts, analyticsData, loading, error, onGenerate }: AnalyticsSectionProps) {
   const [dateRange, setDateRange] = useState('30d')
   const [selectedAccount, setSelectedAccount] = useState('all')
@@ -141,7 +125,7 @@ export default function AnalyticsSection({ accounts, analyticsData, loading, err
           <CardContent className="py-2 px-3">
             <div className="flex items-start gap-2">
               <HiOutlineArrowTrendingUp className="h-4 w-4 text-[hsl(220,75%,50%)] mt-0.5 flex-shrink-0" />
-              <div className="text-xs text-[hsl(220,20%,15%)]">{renderMarkdown(analyticsData.trend_summary)}</div>
+              <p className="text-xs text-[hsl(220,20%,15%)]">{analyticsData.trend_summary}</p>
             </div>
           </CardContent>
         </Card>
@@ -167,7 +151,7 @@ export default function AnalyticsSection({ accounts, analyticsData, loading, err
               </ResponsiveContainer>
             ) : (
               <div className="h-44 flex items-center justify-center text-xs text-[hsl(220,12%,50%)]">
-                Click "Generate Insights" to load chart data
+                Click &quot;Generate Insights&quot; to load chart data
               </div>
             )}
           </CardContent>
@@ -271,7 +255,7 @@ export default function AnalyticsSection({ accounts, analyticsData, loading, err
       {!hasData && !loading && (
         <div className="text-center py-8">
           <HiOutlineChartBarSquare className="h-8 w-8 text-[hsl(220,10%,85%)] mx-auto mb-2" />
-          <p className="text-xs text-[hsl(220,12%,50%)]">Click "Generate Insights" to analyze usage patterns across your accounts.</p>
+          <p className="text-xs text-[hsl(220,12%,50%)]">Click &quot;Generate Insights&quot; to analyze usage patterns across your accounts.</p>
         </div>
       )}
     </div>

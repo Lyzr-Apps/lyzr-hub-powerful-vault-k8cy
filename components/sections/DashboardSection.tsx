@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,10 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
   HiOutlineCreditCard,
   HiOutlineArrowTrendingUp,
@@ -16,10 +20,11 @@ import {
   HiOutlineCheckCircle,
   HiOutlineArrowPath,
   HiOutlineBuildingOffice2,
+  HiOutlineArrowsRightLeft,
 } from 'react-icons/hi2'
 import { Loader2 } from 'lucide-react'
 
-interface AccountData {
+export interface AccountData {
   id: string
   name: string
   apiKey: string
@@ -42,6 +47,7 @@ interface DashboardSectionProps {
   loading: boolean
   error: string | null
   onRefresh: () => void
+  onTransferCredits: (fromId: string, toId: string, amount: number) => void
 }
 
 function formatNum(n: number | undefined): string {
@@ -63,7 +69,13 @@ function statusBadge(status?: string) {
   return <Badge className="rounded-sm text-[10px] bg-[hsl(160,65%,40%)] text-white hover:bg-[hsl(160,65%,35%)]">{status ?? 'active'}</Badge>
 }
 
-export default function DashboardSection({ accounts, monitorData, loading, error, onRefresh }: DashboardSectionProps) {
+export default function DashboardSection({ accounts, monitorData, loading, error, onRefresh, onTransferCredits }: DashboardSectionProps) {
+  const [transferOpen, setTransferOpen] = useState(false)
+  const [fromAccount, setFromAccount] = useState('')
+  const [toAccount, setToAccount] = useState('')
+  const [transferAmount, setTransferAmount] = useState('')
+  const [transferError, setTransferError] = useState('')
+
   const tc = monitorData?.total_credits
   const summaries = Array.isArray(monitorData?.account_summaries) ? monitorData.account_summaries : []
   const alerts = Array.isArray(monitorData?.alerts) ? monitorData.alerts : []
@@ -101,6 +113,27 @@ export default function DashboardSection({ accounts, monitorData, loading, error
         status: a.status,
       }))
 
+  const handleTransfer = () => {
+    setTransferError('')
+    if (!fromAccount || !toAccount) { setTransferError('Select both accounts'); return }
+    if (fromAccount === toAccount) { setTransferError('Cannot transfer to the same account'); return }
+    const amt = parseInt(transferAmount, 10)
+    if (!amt || amt <= 0) { setTransferError('Enter a valid amount'); return }
+    const sourceAcc = accounts.find(a => a.id === fromAccount)
+    if (sourceAcc && amt > sourceAcc.credits.remaining) {
+      setTransferError(`Insufficient credits. ${sourceAcc.name} only has ${sourceAcc.credits.remaining.toLocaleString()} remaining.`)
+      return
+    }
+    onTransferCredits(fromAccount, toAccount, amt)
+    setTransferOpen(false)
+    setFromAccount('')
+    setToAccount('')
+    setTransferAmount('')
+    setTransferError('')
+  }
+
+  const selectedFrom = accounts.find(a => a.id === fromAccount)
+
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
@@ -113,10 +146,16 @@ export default function DashboardSection({ accounts, monitorData, loading, error
             <p className="text-[10px] text-[hsl(220,10%,70%)]">Last updated: {monitorData.last_updated}</p>
           )}
         </div>
-        <Button size="sm" onClick={onRefresh} disabled={loading} className="h-7 text-xs rounded-sm bg-[hsl(220,75%,50%)] hover:bg-[hsl(220,75%,45%)]">
-          {loading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <HiOutlineArrowPath className="h-3 w-3 mr-1" />}
-          Refresh Credits
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button size="sm" variant="outline" onClick={() => setTransferOpen(true)} className="h-7 text-xs rounded-sm">
+            <HiOutlineArrowsRightLeft className="h-3 w-3 mr-1" />
+            Transfer Credits
+          </Button>
+          <Button size="sm" onClick={onRefresh} disabled={loading} className="h-7 text-xs rounded-sm bg-[hsl(220,75%,50%)] hover:bg-[hsl(220,75%,45%)]">
+            {loading ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <HiOutlineArrowPath className="h-3 w-3 mr-1" />}
+            Refresh Credits
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -252,6 +291,84 @@ export default function DashboardSection({ accounts, monitorData, loading, error
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={transferOpen} onOpenChange={setTransferOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-semibold flex items-center gap-2">
+              <HiOutlineArrowsRightLeft className="h-4 w-4 text-[hsl(220,75%,50%)]" />
+              Transfer Credits Between Accounts
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">From Account</Label>
+              <Select value={fromAccount} onValueChange={(v) => { setFromAccount(v); setTransferError('') }}>
+                <SelectTrigger className="h-8 text-xs rounded-sm">
+                  <SelectValue placeholder="Select source account" />
+                </SelectTrigger>
+                <SelectContent>
+                  {accounts.map(a => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.name} ({a.credits.remaining.toLocaleString()} available)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-center justify-center">
+              <HiOutlineArrowTrendingDown className="h-4 w-4 text-[hsl(220,12%,50%)]" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">To Account</Label>
+              <Select value={toAccount} onValueChange={(v) => { setToAccount(v); setTransferError('') }}>
+                <SelectTrigger className="h-8 text-xs rounded-sm">
+                  <SelectValue placeholder="Select destination account" />
+                </SelectTrigger>
+                <SelectContent>
+                  {accounts.filter(a => a.id !== fromAccount).map(a => (
+                    <SelectItem key={a.id} value={a.id}>
+                      {a.name} ({a.credits.remaining.toLocaleString()} current)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">Amount to Transfer</Label>
+              <Input
+                type="number"
+                placeholder="Enter credit amount"
+                value={transferAmount}
+                onChange={(e) => { setTransferAmount(e.target.value); setTransferError('') }}
+                className="h-8 text-xs rounded-sm"
+                min={1}
+                max={selectedFrom?.credits.remaining ?? 999999}
+              />
+              {selectedFrom && (
+                <p className="text-[10px] text-[hsl(220,12%,50%)]">
+                  Available: {selectedFrom.credits.remaining.toLocaleString()} credits from {selectedFrom.name}
+                </p>
+              )}
+            </div>
+            {transferError && (
+              <div className="flex items-center gap-1.5 text-[hsl(0,70%,50%)]">
+                <HiOutlineExclamationTriangle className="h-3 w-3" />
+                <p className="text-xs">{transferError}</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setTransferOpen(false)} className="h-7 text-xs rounded-sm">
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleTransfer} className="h-7 text-xs rounded-sm bg-[hsl(220,75%,50%)] hover:bg-[hsl(220,75%,45%)]">
+              <HiOutlineArrowsRightLeft className="h-3 w-3 mr-1" />
+              Transfer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

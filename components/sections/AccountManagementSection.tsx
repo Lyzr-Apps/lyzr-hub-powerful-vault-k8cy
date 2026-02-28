@@ -62,21 +62,6 @@ function effortBadge(e?: string) {
   return <Badge variant="outline" className="rounded-sm text-[10px] border-[hsl(160,65%,40%)] text-[hsl(160,65%,40%)]">{e ?? 'low'}</Badge>
 }
 
-function renderMarkdown(text: string) {
-  if (!text) return null
-  return (
-    <div className="space-y-1">
-      {text.split('\n').map((line, i) => {
-        if (line.startsWith('### ')) return <h4 key={i} className="font-semibold text-xs mt-2 mb-0.5">{line.slice(4)}</h4>
-        if (line.startsWith('## ')) return <h3 key={i} className="font-semibold text-sm mt-2 mb-0.5">{line.slice(3)}</h3>
-        if (line.startsWith('- ') || line.startsWith('* ')) return <li key={i} className="ml-3 list-disc text-xs">{line.slice(2)}</li>
-        if (!line.trim()) return <div key={i} className="h-0.5" />
-        return <p key={i} className="text-xs">{line}</p>
-      })}
-    </div>
-  )
-}
-
 export default function AccountManagementSection({ accounts, advisorData, loading, error, onGetRecommendations }: AccountManagementSectionProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -123,7 +108,7 @@ export default function AccountManagementSection({ accounts, advisorData, loadin
       {advisorData?.assessment_summary && advisorData.assessment_summary.length > 80 && (
         <Card className="rounded-sm border border-[hsl(220,15%,88%)] shadow-none">
           <CardContent className="py-2 px-3">
-            <div className="text-xs text-[hsl(220,20%,15%)]">{renderMarkdown(advisorData.assessment_summary)}</div>
+            <p className="text-xs text-[hsl(220,20%,15%)]">{advisorData.assessment_summary}</p>
           </CardContent>
         </Card>
       )}
@@ -274,16 +259,16 @@ export default function AccountManagementSection({ accounts, advisorData, loadin
           </CardHeader>
           <CardContent className="px-3 py-0 pb-3">
             <div className="space-y-1.5">
-              {actionItems.map((ai, i) => (
+              {actionItems.map((item, i) => (
                 <div key={i} className="flex items-start gap-2 border border-[hsl(220,15%,88%)] rounded-sm p-2">
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-[hsl(220,20%,15%)]">{ai.action ?? ''}</p>
+                    <p className="text-xs font-medium text-[hsl(220,20%,15%)]">{item.action ?? ''}</p>
                     <div className="flex items-center gap-2 mt-0.5 text-[10px] text-[hsl(220,12%,50%)]">
-                      {ai.estimated_impact && <span>Impact: {ai.estimated_impact}</span>}
-                      {ai.timeline && <span>Timeline: {ai.timeline}</span>}
+                      {item.estimated_impact && <span>Impact: {item.estimated_impact}</span>}
+                      {item.timeline && <span>Timeline: {item.timeline}</span>}
                     </div>
                   </div>
-                  <Badge className={`rounded-sm text-[10px] h-4 px-1 flex-shrink-0 ${priorityColor(ai.priority)}`}>{ai.priority ?? 'low'}</Badge>
+                  <Badge className={`rounded-sm text-[10px] h-4 px-1 flex-shrink-0 ${priorityColor(item.priority)}`}>{item.priority ?? 'low'}</Badge>
                 </div>
               ))}
             </div>
@@ -294,7 +279,7 @@ export default function AccountManagementSection({ accounts, advisorData, loadin
       {!hasData && !loading && (
         <div className="text-center py-8">
           <HiOutlineClipboardDocumentCheck className="h-8 w-8 text-[hsl(220,10%,85%)] mx-auto mb-2" />
-          <p className="text-xs text-[hsl(220,12%,50%)]">Click "Get Recommendations" to receive AI-powered advice on credit rebalancing and account consolidation.</p>
+          <p className="text-xs text-[hsl(220,12%,50%)]">Click &quot;Get Recommendations&quot; to receive AI-powered advice on credit rebalancing and account consolidation.</p>
         </div>
       )}
     </div>

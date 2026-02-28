@@ -71,12 +71,6 @@ export default function SettingsSection({ accounts }: SettingsSectionProps) {
     setMembers(prev => prev.map(m => m.id === id ? { ...m, role } : m))
   }
 
-  const roleBadge = (role: string) => {
-    if (role === 'admin') return <Badge className="rounded-sm text-[10px] bg-[hsl(280,55%,55%)] text-white hover:bg-[hsl(280,55%,50%)]">admin</Badge>
-    if (role === 'manager') return <Badge className="rounded-sm text-[10px] bg-[hsl(220,75%,50%)] text-white hover:bg-[hsl(220,75%,45%)]">manager</Badge>
-    return <Badge variant="outline" className="rounded-sm text-[10px]">viewer</Badge>
-  }
-
   return (
     <div className="space-y-3">
       <h2 className="text-base font-semibold tracking-tight text-[hsl(220,20%,15%)]">Settings</h2>
