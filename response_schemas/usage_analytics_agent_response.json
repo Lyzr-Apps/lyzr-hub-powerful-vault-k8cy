@@ -1,0 +1,72 @@
+{
+  "agent_name": "Usage Analytics Agent",
+  "agent_id": "69a2915f7feec6663e53dac3",
+  "description": "Analyzes historical credit consumption patterns, identifies usage trends, compares account-level utilization rates, and generates optimization insights. Returns structured data with trend analysis, per-account consumption data, time-series data points, and optimization recommendations.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "trend_summary": "string",
+    "period": "string",
+    "account_analytics": [
+      {
+        "account_name": "string",
+        "total_consumed": "number",
+        "avg_daily_usage": "number",
+        "trend": "string",
+        "efficiency_score": "number",
+        "utilization_rate": "number"
+      }
+    ],
+    "time_series_data": [
+      {
+        "date": "string",
+        "total_usage": "number",
+        "by_account": {
+          "details": "string"
+        }
+      }
+    ],
+    "recommendations": [
+      {
+        "title": "string",
+        "description": "string",
+        "impact": "string",
+        "priority": "string"
+      }
+    ],
+    "total_consumption": "number"
+  },
+  "example_response": {
+    "trend_summary": "sample string",
+    "period": "sample string",
+    "account_analytics": [
+      {
+        "account_name": "sample string",
+        "total_consumed": 0,
+        "avg_daily_usage": 0,
+        "trend": "sample string",
+        "efficiency_score": 0,
+        "utilization_rate": 0
+      }
+    ],
+    "time_series_data": [
+      {
+        "date": "sample string",
+        "total_usage": 0,
+        "by_account": {
+          "details": "sample string"
+        }
+      }
+    ],
+    "recommendations": [
+      {
+        "title": "sample string",
+        "description": "sample string",
+        "impact": "sample string",
+        "priority": "sample string"
+      }
+    ],
+    "total_consumption": 0
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "workflow": "Lyzr Multi-Account Credit Hub",
+  "pattern": "multiple_independent_agents",
+  "agents": {
+    "credit_monitor": {
+      "agent_id": "69a2915e27b2efe3a887db3a",
+      "name": "Credit Monitor Agent",
+      "description": "Analyzes credit balances across all connected Lyzr accounts, generates status summaries, identifies low-balance accounts, and creates alert notifications.",
+      "provider": "openai",
+      "model": "gpt-4.1",
+      "temperature": 0.2,
+      "top_p": 1,
+      "response_schema_file": "response_schemas/credit_monitor_agent_response.json"
+    },
+    "usage_analytics": {
+      "agent_id": "69a2915f7feec6663e53dac3",
+      "name": "Usage Analytics Agent",
+      "description": "Analyzes historical credit consumption patterns, identifies usage trends, compares account-level utilization rates, and generates optimization insights.",
+      "provider": "openai",
+      "model": "gpt-4.1",
+      "temperature": 0.3,
+      "top_p": 1,
+      "response_schema_file": "response_schemas/usage_analytics_agent_response.json"
+    },
+    "account_advisor": {
+      "agent_id": "69a29172e72641e0c6070b7f",
+      "name": "Account Advisor Agent",
+      "description": "Reviews account configurations and credit distribution, recommends rebalancing strategies, and suggests consolidation opportunities across accounts.",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-5",
+      "temperature": 0.4,
+      "top_p": 0.95,
+      "response_schema_file": "response_schemas/account_advisor_agent_response.json"
+    }
+  },
+  "workflow_nodes": {
+    "input_node": "User Query",
+    "credit_monitor": "Credit Monitor Agent",
+    "usage_analytics": "Usage Analytics Agent",
+    "account_advisor": "Account Advisor Agent"
+  },
+  "workflow_edges": [
+    {"source": "input_node", "target": "credit_monitor"},
+    {"source": "input_node", "target": "usage_analytics"},
+    {"source": "input_node", "target": "account_advisor"}
+  ]
+}

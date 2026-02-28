@@ -1,0 +1,68 @@
+{
+  "agent_name": "Account Advisor Agent",
+  "agent_id": "69a29172e72641e0c6070b7f",
+  "description": "Reviews account configurations and credit distribution, recommends rebalancing strategies, and suggests consolidation opportunities across accounts. Returns structured data with rebalancing recommendations, consolidation suggestions, risk assessments, and action items.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "assessment_summary": "string",
+    "health_score": "number",
+    "rebalancing_recommendations": [
+      {
+        "from_account": "string",
+        "to_account": "string",
+        "amount": "number",
+        "reason": "string",
+        "risk_level": "string",
+        "priority": "string"
+      }
+    ],
+    "consolidation_suggestions": [
+      {
+        "suggestion": "string",
+        "accounts_affected": "string",
+        "estimated_savings": "string",
+        "implementation_effort": "string"
+      }
+    ],
+    "action_items": [
+      {
+        "action": "string",
+        "priority": "string",
+        "estimated_impact": "string",
+        "timeline": "string"
+      }
+    ]
+  },
+  "example_response": {
+    "assessment_summary": "sample string",
+    "health_score": 0,
+    "rebalancing_recommendations": [
+      {
+        "from_account": "sample string",
+        "to_account": "sample string",
+        "amount": 0,
+        "reason": "sample string",
+        "risk_level": "sample string",
+        "priority": "sample string"
+      }
+    ],
+    "consolidation_suggestions": [
+      {
+        "suggestion": "sample string",
+        "accounts_affected": "sample string",
+        "estimated_savings": "sample string",
+        "implementation_effort": "sample string"
+      }
+    ],
+    "action_items": [
+      {
+        "action": "sample string",
+        "priority": "sample string",
+        "estimated_impact": "sample string",
+        "timeline": "sample string"
+      }
+    ]
+  }
+}

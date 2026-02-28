@@ -1,0 +1,66 @@
+{
+  "agent_name": "Credit Monitor Agent",
+  "agent_id": "69a2915e27b2efe3a887db3a",
+  "description": "Analyzes credit balances across all connected Lyzr accounts, generates status summaries, identifies low-balance accounts, and creates alert notifications. Returns structured data with account summaries, total/used/remaining credits, alerts for low-balance accounts with severity levels, and per-account usage percentages.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "overall_status": "string",
+    "total_credits": {
+      "allocated": "number",
+      "used": "number",
+      "remaining": "number",
+      "usage_percentage": "number"
+    },
+    "account_summaries": [
+      {
+        "account_name": "string",
+        "account_id": "string",
+        "allocated": "number",
+        "used": "number",
+        "remaining": "number",
+        "usage_percentage": "number",
+        "status": "string"
+      }
+    ],
+    "alerts": [
+      {
+        "severity": "string",
+        "account_name": "string",
+        "message": "string",
+        "threshold": "number"
+      }
+    ],
+    "last_updated": "string"
+  },
+  "example_response": {
+    "overall_status": "sample string",
+    "total_credits": {
+      "allocated": 0,
+      "used": 0,
+      "remaining": 0,
+      "usage_percentage": 0
+    },
+    "account_summaries": [
+      {
+        "account_name": "sample string",
+        "account_id": "sample string",
+        "allocated": 0,
+        "used": 0,
+        "remaining": 0,
+        "usage_percentage": 0,
+        "status": "sample string"
+      }
+    ],
+    "alerts": [
+      {
+        "severity": "sample string",
+        "account_name": "sample string",
+        "message": "sample string",
+        "threshold": 0
+      }
+    ],
+    "last_updated": "sample string"
+  }
+}
